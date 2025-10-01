@@ -1,0 +1,5 @@
+../Core/Src/main.c:7:9:main	1
+../Core/Src/main.c:36:12:TestFunction	1
+../Core/Src/main.c:49:6:SystemClock_Config	4
+../Core/Src/main.c:94:13:MX_GPIO_Init	1
+../Core/Src/main.c:125:6:Error_Handler	1

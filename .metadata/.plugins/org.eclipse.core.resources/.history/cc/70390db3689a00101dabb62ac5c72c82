@@ -1,0 +1,323 @@
+#include "main.h"
+
+
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+
+int main(void)
+{
+  HAL_Init();
+  SystemClock_Config();
+  MX_GPIO_Init();
+//  HAL_GPIO_Init();
+
+  RCC->AHB2ENR |= (RCC_AHB2ENR_GPIOAEN | RCC_AHB2ENR_GPIOCEN);
+
+
+  /*
+   * RCC = RESET and clock control -> this controls power/clocks to peripherals
+   *->AHB2ENR = regisiter that enables disables GPIO ports on the AHB2BUS
+   *RCC_AHB2ENR_GPIOAEN = Mask for enabling port A
+   *RCC_AHB2ENR_GPIOCEN = Masking for enableing port C
+   *|= means set these bits to 1 leaving all others unchanged
+   */
+//  RCC->AHB2ENR |= (RCC_AHB2ENR_GPIOAEN | RCC_AHB2EN_GPIOCEN);
+
+
+  /*
+   * 1st one is we're getting the register of pin 5 and making a mask for them making mask for them clearing them by making them 00
+   * but
+   * GPIO_MODER_MODE5_0 = constant that sets just the lowest of the two bits for pin 5 so after this PA5 bits are 01
+   */
+//  GPIOA->MODER &= ~(GPIO_MODER_MODE5);
+//  GPIOA->MODER |= (GPIO_MODER_MODE5_0);
+
+  /*
+   * Register that selects the pull resistor for each pin
+   * Here we're setting the mask for pin 5 and clearing it to 00 which is no pull resistor
+   */
+  //GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPD5);
+
+  //GPIOA->OSPEEDR = register that sets output speed for each pin
+  /* 00 = Low speed
+   * 01 = med speed
+   * 10 = HIGH
+   * 11 = VERY HIGH
+   *
+   * here we're clearing them with the mask so we're setting them to low speed (which saves power and reduces eletrical noise)
+   *
+   */
+  //GPIOA->OSPEEDR &= ~(GPIO_OSPEEDR_OSPEED5);
+
+
+
+  /*
+   * GPIOC is the folder for the C ports the arrow is to access the field inside that struct
+   * MODER is the register (a 32bit number) that controls the mode of pins in Port C for this one
+   * PUPDR register that controls the pull-up/pull-down for pins in port C here
+   * GPIO_MODER_MODE13 <- this is a mask constant it marks the 2 bits in moder that belong to pin 13
+   * then for PUPDR it makrs the pins 13's two bits there with the &= being AND the left side with the right side store the result back
+   * ~ means NOT so we we're flipping the bits form 0->1 and viceversa
+   * we're doing this so that we're able to clear bits by making a mask with 1's in the positions we want to clear in this case
+   * Pin 13 through GPIO_MODER_MODE13 then we're inverting the mask with ~ to 0's
+   * and at the end AND &= ~mask allows us to 1 jeeps a bit unchanged and 0 clears the bit
+   *
+   */
+
+  	//Clear the 2 bits that control pin13's mode and pin 13 mode become 00 -> input mode
+  //We dont write 00 as that would mess up all setting for all other pins but this way we only change these
+//  GPIOC->MODER &= ~(GPIO_MODER_MODE13);
+  //PUPDER registor we clear the two bits that control pin 13's pull resistor and the bits become 00 -> NO pull up and no pull down
+  ////This is correct if we want to do pullup/down externally and we dont want the MCU to bias it
+//  GPIOC->PUPDR &= ~(GPIO_PUPDR_PUPD13);
+
+  /*
+   * GPIOC->IDR = input data regisiter it shows the current HIGH or low state of all 16 ports in PORT C here
+   * the & GPIO_PIN_13 is a mask to look only at the bit 13 so its checking if pin c13 is high
+   */
+  //if(GPIOC->IDR & GPIO_PIN_13)
+
+  /*
+   * GPIOA->BRR = Output data regisiter shows the current state of PA5 so if its already HIGH or LOW
+   * so here we're checking if PA5 is already high
+   * GPIOA->BRR = GPIO_PIN_5  BRR= is bit reset regisiter writing a 1 here forces PA5 low
+   * but if PA5 is already low then GPIOA->BSRR = GPIO_PIN_5 which BSRR is bit set/reset regisiter writing a 1 here froces PA5 HIGH
+   * so all this toggles the led
+   */
+//  if(GPIOA->ODR & GPIO_PIN_5)
+//	  GPIOA->BRR = GPIO_PIN_5;
+//  else
+//	  GPIOA->BSRR = GPIO_PIN_5;
+
+  //Setting Pins 1-3 in GPIOC into output mode after clearing them
+  GPIOC->MODER &= ~(GPIO_MODER_MODE0);
+  GPIOC->MODER |= GPIO_MODER_MODE0_0;
+
+  GPIOC->MODER &= ~(GPIO_MODER_MODE1);
+  GPIOC->MODER |= GPIO_MODER_MODE1_0;
+
+  GPIOC->MODER &= ~(GPIO_MODER_MODE2);
+  GPIOC->MODER |= GPIO_MODER_MODE2_0;
+
+
+  GPIOC->BRR = GPIO_PIN_0;
+  GPIOC->BRR = GPIO_PIN_1;
+  GPIOC->BRR = GPIO_PIN_2;
+
+  //We clear the field with MODER
+  //OR is for the desired value with |= value_bits
+  //We're putting pin 13 which would be our putting into pull up mode so that when we release it, it ticks up
+  GPIOC->MODER &= ~(GPIO_MODER_MODE13);
+  GPIOC->PUPDR |= GPIO_PUPDR_PUPD13_1;
+  int count = 0;
+
+
+  while (1)
+  {
+//
+
+	  if(!(GPIOC->IDR & GPIO_PIN_13)){
+
+//		  GPIOC->BSRR = GPIO_PIN_0;
+//		  GPIOC->BSRR = GPIO_PIN_1;
+//		 GPIOC->BSRR = GPIO_PIN_2;
+//		  printf("%d", count);
+		  if(count > 7){
+			  count = 0;
+		  }
+		  count++;
+	  }
+//	  else{
+//		  GPIOC->BRR = GPIO_PIN_0;
+//			  GPIOC->BRR = GPIO_PIN_1;
+//			  GPIOC->BRR = GPIO_PIN_2;
+//	  }
+
+	  /*
+	   * BIINARY
+	   * 0: 000
+	   * 1: 001
+	   * 2: 010
+	   * 3: 011
+	   * 4: 100
+	   * 5: 101
+	   * 6: 110
+	   * 7: 111
+//	   */
+	  if (count == 0) {
+		  GPIOC->BRR = GPIO_PIN_0;
+		  GPIOC->BRR = GPIO_PIN_1;
+		  GPIOC->BRR = GPIO_PIN_2;
+
+	  }
+	  else if (count == 1) {
+	      printf("Case 1\n");
+	      GPIOC->BSRR = GPIO_PIN_0;
+		  GPIOC->BRR = GPIO_PIN_1;
+		  GPIOC->BRR = GPIO_PIN_2;
+	  }
+	  else if (count == 2) {
+	      printf("Case 2\n");
+	      GPIOC->BRR = GPIO_PIN_0;
+	      GPIOC->BSRR = GPIO_PIN_1;
+			  GPIOC->BRR = GPIO_PIN_2;
+	  }
+	  else if (count == 3) {
+	      printf("Case 3\n");
+	      GPIOC->BSRR = GPIO_PIN_0;
+		  GPIOC->BRR = GPIO_PIN_1;
+		  GPIOC->BRR = GPIO_PIN_2;
+	  }
+	  else if (count == 4) {
+	      printf("Case 4\n");
+	      GPIOC->BRR = GPIO_PIN_0;
+	      GPIOC->BRR = GPIO_PIN_1;
+	      GPIOC->BSRR = GPIO_PIN_2;
+	  }
+	  else if (count == 5) {
+	      printf("Case 5\n");
+	      GPIOC->BSRR = GPIO_PIN_0;
+		  GPIOC->BRR = GPIO_PIN_1;
+		  GPIOC->BSRR = GPIO_PIN_2;
+	  }
+	  else if (count == 6) {
+	      printf("Case 6\n");
+	      GPIOC->BRR = GPIO_PIN_0;
+	      GPIOC->BSRR = GPIO_PIN_1;
+			  GPIOC->BSRR = GPIO_PIN_2;
+	  }
+	  else if (count == 7) {
+	      printf("Case 7\n");
+	      GPIOC->BSRR = GPIO_PIN_0;
+		  GPIOC->BSRR = GPIO_PIN_1;
+		  GPIOC->BSRR = GPIO_PIN_2;
+	  }
+	  HAL_Delay(500);
+  }
+  /* USER CODE END 3 */
+}
+
+/**
+  * @brief System Clock Configuration
+  * @retval None
+  */
+void SystemClock_Config(void)
+{
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  /** Configure the main internal regulator output voltage
+  */
+  if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_MSI;
+  RCC_OscInitStruct.MSIState = RCC_MSI_ON;
+  RCC_OscInitStruct.MSICalibrationValue = 0;
+  RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_6;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_MSI;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+/**
+  * @brief GPIO Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_GPIO_Init(void)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+/* USER CODE BEGIN MX_GPIO_Init_1 */
+/* USER CODE END MX_GPIO_Init_1 */
+
+  /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0|GPIO_PIN_1, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : PC13 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PC0 PC1 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PA3 */
+  GPIO_InitStruct.Pin = GPIO_PIN_3;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+/* USER CODE BEGIN MX_GPIO_Init_2 */
+/* USER CODE END MX_GPIO_Init_2 */
+}
+
+/* USER CODE BEGIN 4 */
+
+/* USER CODE END 4 */
+
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
+void Error_Handler(void)
+{
+  /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
+  __disable_irq();
+  while (1)
+  {
+  }
+  /* USER CODE END Error_Handler_Debug */
+}
+
+#ifdef  USE_FULL_ASSERT
+/**
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
+void assert_failed(uint8_t *file, uint32_t line)
+{
+  /* USER CODE BEGIN 6 */
+  /* User can add his own implementation to report the file name and line number,
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* USER CODE END 6 */
+}
+#endif /* USE_FULL_ASSERT */
