@@ -1,104 +1,255 @@
-/* USER CODE BEGIN Header */
-/**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2025 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
-/* USER CODE END Header */
-/* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include <math.h>
 
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
 
-/* USER CODE END Includes */
-
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
-
-/* USER CODE END PTD */
-
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
-
-/* USER CODE END PD */
-
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
-
-/* Private variables ---------------------------------------------------------*/
-
-/* USER CODE BEGIN PV */
-
-/* USER CODE END PV */
-
-/* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-/* USER CODE BEGIN PFP */
 
-/* USER CODE END PFP */
+void numcheck(int num);
 
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
-
-/**
-  * @brief  The application entry point.
-  * @retval int
-  */
 int main(void)
 {
-
-  /* USER CODE BEGIN 1 */
-
-  /* USER CODE END 1 */
-
-  /* MCU Configuration--------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
-
-  /* Configure the system clock */
   SystemClock_Config();
-
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
-
-  /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  /* USER CODE BEGIN 2 */
+//  HAL_GPIO_Init();
 
-  /* USER CODE END 2 */
 
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-    /* USER CODE END WHILE */
+  //Intalizing the ports
+  RCC->AHB2ENR |= (RCC_AHB2ENR_GPIOAEN | RCC_AHB2ENR_GPIOCEN | RCC_AHB2ENR_GPIOBEN);
 
-    /* USER CODE BEGIN 3 */
-  }
-  /* USER CODE END 3 */
+  //Setting up the outputs for the leds
+  GPIOC->MODER &= ~(GPIO_MODER_MODE0);
+  GPIOC->MODER |= GPIO_MODER_MODE0_0;
+
+
+  GPIOC->MODER &= ~(GPIO_MODER_MODE1);
+  GPIOC->MODER |= GPIO_MODER_MODE1_0;
+
+  GPIOC->MODER &= ~(GPIO_MODER_MODE2);
+  GPIOC->MODER |= GPIO_MODER_MODE2_0;
+
+  GPIOC->MODER &= ~(GPIO_MODER_MODE3);
+  GPIOC->MODER |= GPIO_MODER_MODE3_0;
+
+
+  //Output
+  //Setting up the output for the keypad by 00 then turning the 0 into a 1 making it 01
+
+  GPIOA->MODER &= ~(GPIO_MODER_MODE9);
+  GPIOA->MODER |= GPIO_MODER_MODE9_0;
+
+  GPIOA->MODER &= ~(GPIO_MODER_MODE8);
+  GPIOA->MODER |= GPIO_MODER_MODE8_0;
+
+  GPIOB->MODER &= ~(GPIO_MODER_MODE10);
+  GPIOB->MODER |= GPIO_MODER_MODE10_0;
+
+  // GPIOB->MODER |= GPIO_MODER_MODE3_0;
+
+  //setting the input for the keypad by making it 00
+  GPIOB->MODER &= ~(GPIO_MODER_MODE4);
+  GPIOB->MODER &= ~(GPIO_MODER_MODE5);
+  GPIOB->MODER &= ~(GPIO_MODER_MODE3);
+  GPIOA->MODER &= ~(GPIO_MODER_MODE10);
+
+  //So we're setting the state
+
+//     //So we're setting the states into
+//
+//     GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPD5);
+//
+//     GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPD4);
+//
+//     GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPD10);
+//
+//     GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPD3);
+  //Setting the pins into 00 with the intal and then in the or we're adding a 1 to the first 0 making 10
+  GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPD4);
+  GPIOB->PUPDR |= GPIO_PUPDR_PUPD4_1;  // Pull-down on PB4
+
+  GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPD5);
+  GPIOB->PUPDR |= GPIO_PUPDR_PUPD5_1;  // Pull-down on PB5
+
+  GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPD3);
+  GPIOB->PUPDR |= GPIO_PUPDR_PUPD3_1;  // Pull-down on PB3
+
+  GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPD10);
+  GPIOA->PUPDR |= GPIO_PUPDR_PUPD10_1; // Pull-down on PA10
+
+  //ALL OUTPUTS LOW for the keypad
+  GPIOA->BRR = GPIO_PIN_9;
+
+  GPIOA->BRR = GPIO_PIN_8;
+
+  GPIOB->BRR = GPIO_PIN_10;
+
+  // GPIOB->BRR = GPIO_PIN_3;
+
+ //Setting all the outputs of the leds to LOW
+ GPIOC->BRR = GPIO_PIN_0;
+
+ GPIOC->BRR = GPIO_PIN_1;
+
+ GPIOC->BRR = GPIO_PIN_2;
+
+ GPIOC->BRR = GPIO_PIN_3;
+
+ //GPIOB 3 5 4 10
+
+ while (1){
+	 //starting by making the outputs lwo for the leds
+	 GPIOC->BRR = GPIO_PIN_0;
+	 GPIOC->BRR = GPIO_PIN_1;
+	 GPIOC->BRR = GPIO_PIN_2;
+	 GPIOC->BRR = GPIO_PIN_3;
+
+	 //setting pin 9 to low and rasing pin 10 to High so that we cycle which is on or off
+ 	GPIOA->BRR = GPIO_PIN_9;
+    GPIOB->BSRR = GPIO_PIN_10;
+
+//     HAL_Delay(50);
+    //Checking every row if any of the pins are high then calling the function for the number based on which was pressed form that row
+     if(GPIOA->IDR & GPIO_PIN_10)
+     	numcheck(1);
+
+     else if(GPIOB->IDR & GPIO_PIN_3)
+     	numcheck(4);
+
+     else if(GPIOB->IDR & GPIO_PIN_5)
+     	numcheck(7);
+
+     else if(GPIOB->IDR & GPIO_PIN_4)
+ 		numcheck(10);
+
+
+
+     //Setting pin 10 low and pin 8 high for cycling
+     GPIOB->BRR = GPIO_PIN_10;
+     GPIOA->BSRR = GPIO_PIN_8;
+
+     //Checking every row if any of the pins are high then calling the function for the number based on which was pressed form that row
+     if(GPIOA->IDR & GPIO_PIN_10)
+     	numcheck(2);
+
+     else if(GPIOB->IDR & GPIO_PIN_3)
+     	numcheck(5);
+
+     else if(GPIOB->IDR & GPIO_PIN_5)
+     	numcheck(8);
+
+     else if(GPIOB->IDR & GPIO_PIN_4)
+     		numcheck(0);
+
+     //Setting pin 9 low and pin 9 high for cycling
+
+     GPIOA->BRR = GPIO_PIN_8;
+     GPIOA->BSRR = GPIO_PIN_9;
+
+     //Checking every row if any of the pins are high then calling the function for the number based on which was pressed form that row
+     if(GPIOA->IDR & GPIO_PIN_10)
+     	numcheck(3);
+
+     else if(GPIOB->IDR & GPIO_PIN_3)
+     	numcheck(6);
+
+     else if(GPIOB->IDR & GPIO_PIN_5)
+     	numcheck(9);
+
+     else if(GPIOB->IDR & GPIO_PIN_4)
+     	numcheck(11);
+
+   }
+
+}
+
+//The numCheck function is the part that sets all the states for the LEDs we made this so that the code could be a lot cleaner
+void numcheck(int num){
+	if (num == 0) {
+	    GPIOC->BRR = GPIO_PIN_0;
+	    GPIOC->BRR = GPIO_PIN_1;
+	    GPIOC->BRR = GPIO_PIN_2;
+	    GPIOC->BRR = GPIO_PIN_3;
+	    HAL_Delay(20);
+
+	} else if (num == 1) {
+	    GPIOC->BSRR = GPIO_PIN_0;
+	    GPIOC->BRR = GPIO_PIN_1;
+	    GPIOC->BRR = GPIO_PIN_2;
+	    GPIOC->BRR = GPIO_PIN_3;
+	    HAL_Delay(20);
+
+	} else if (num == 2) {
+	    GPIOC->BRR = GPIO_PIN_0;
+	    GPIOC->BSRR = GPIO_PIN_1;
+	    GPIOC->BRR = GPIO_PIN_2;
+	    GPIOC->BRR = GPIO_PIN_3;
+	    HAL_Delay(20);
+
+	} else if (num == 3) {
+	    GPIOC->BSRR = GPIO_PIN_0;
+	    GPIOC->BSRR = GPIO_PIN_1;
+	    GPIOC->BRR = GPIO_PIN_2;
+	    GPIOC->BRR = GPIO_PIN_3;
+	    HAL_Delay(20);
+
+	} else if (num == 4) {
+	    GPIOC->BRR = GPIO_PIN_0;
+	    GPIOC->BRR = GPIO_PIN_1;
+	    GPIOC->BSRR = GPIO_PIN_2;
+	    GPIOC->BRR = GPIO_PIN_3;
+	    HAL_Delay(20);
+
+	} else if (num == 5) {
+	    GPIOC->BSRR = GPIO_PIN_0;
+	    GPIOC->BRR = GPIO_PIN_1;
+	    GPIOC->BSRR = GPIO_PIN_2;
+	    GPIOC->BRR = GPIO_PIN_3;
+	    HAL_Delay(20);
+
+	} else if (num == 6) {
+	    GPIOC->BRR = GPIO_PIN_0;
+	    GPIOC->BSRR = GPIO_PIN_1;
+	    GPIOC->BSRR = GPIO_PIN_2;
+	    GPIOC->BRR = GPIO_PIN_3;
+	    HAL_Delay(20);
+
+	} else if (num == 7) {
+	    GPIOC->BSRR = GPIO_PIN_0;
+	    GPIOC->BSRR = GPIO_PIN_1;
+	    GPIOC->BSRR = GPIO_PIN_2;
+	    GPIOC->BRR = GPIO_PIN_3;
+	    HAL_Delay(20);
+
+	} else if (num == 8) {
+	    GPIOC->BRR = GPIO_PIN_0;
+	    GPIOC->BRR = GPIO_PIN_1;
+	    GPIOC->BRR = GPIO_PIN_2;
+	    GPIOC->BSRR = GPIO_PIN_3;
+	    HAL_Delay(20);
+
+	} else if (num == 9) {
+	    GPIOC->BSRR = GPIO_PIN_0;
+	    GPIOC->BRR = GPIO_PIN_1;
+	    GPIOC->BRR = GPIO_PIN_2;
+	    GPIOC->BSRR = GPIO_PIN_3;
+	    HAL_Delay(20);
+
+	} else if (num == 10) {
+	    // Add something for the
+		GPIOC->BRR = GPIO_PIN_0;
+		GPIOC->BSRR = GPIO_PIN_1;
+		GPIOC->BRR = GPIO_PIN_2;
+		GPIOC->BSRR = GPIO_PIN_3;
+
+	} else if (num == 11) {
+	    // Add something for the hash
+		GPIOC->BSRR = GPIO_PIN_0;
+		GPIOC->BSRR = GPIO_PIN_1;
+		GPIOC->BRR = GPIO_PIN_2;
+		GPIOC->BSRR = GPIO_PIN_3;
+	}
+
 }
 
 /**

@@ -1,0 +1,10 @@
+16:31:35 **** Incremental Build of configuration Debug for project Keyboard ****
+make -j12 all 
+arm-none-eabi-size  Keyboard.elf 
+   text	   data	    bss	    dec	    hex	filename
+   7396	     12	   1572	   8980	   2314	Keyboard.elf
+Finished building: default.size.stdout
+ 
+
+16:31:35 Build Finished. 0 errors, 0 warnings. (took 525ms)
+
